@@ -64,9 +64,9 @@ private:
     static constexpr int height = 600;
     static constexpr int dt = 1000;
     // count of activated cells
-    int num = 1;
+    int active_count = 1;
     // короче это итератор каким по счету чел нажал кнопку
-    int i = 1;
+    int iter = 1;
     // короче это счет чела
     int score = 0;
 
@@ -114,7 +114,7 @@ private:
 
     void activation()
     {
-        for (int i = 1;i <= num;++i)
+        for (int i = 1;i <= active_count;++i)
         {
             int rand_index = rand()%cells.size();
             while (count( order.begin(), order.end(), rand_index) != 0)
@@ -135,7 +135,8 @@ private:
     {
         detach(result_box);
         detach(result_text);
-        detach(play_again_button);
+        if (score == 0) detach(play_again_button);
+        else detach(continue_button);
         detach(quit);
         detach(score_box);
         detach(score_text);
@@ -143,7 +144,7 @@ private:
         for (int i = 0; i < cells.size(); i++)
             cells[i].is_activated = false;
 
-        i = 1;
+        iter = 1;
         order.clear();
 
         start_game();
@@ -172,17 +173,17 @@ private:
         Fl_Widget& w = Graph_lib::reference_to<Fl_Widget>(wid);
         Cell& c = at (Point{w.x(), w.y()});
 
-        string play_again_text = "Play again!";
         // TODO: Сделать вывод победы \ DONE
-        if (c.seq_num == i)
+        if (c.seq_num == iter)
         {
-            i++;
-            if (i > num)
+            iter++;
+            if (iter > active_count)
             {
-                score_text.set_label("SCORE:" + to_string(num));
-                result_text.set_label("U RIGHT");
+                attach(continue_button);
                 score += 1;
-                num += 1;
+                score_text.set_label("SCORE:" + to_string(score));
+                result_text.set_label("U RIGHT");
+                active_count += 1;
             }
             else
                 return;
@@ -190,20 +191,20 @@ private:
         //TODO: Сделать кнопку назад при проигрыше \ DONE
         else
         {
+            attach(play_again_button);
             score = 0;
-            score_text.set_label("SCORE:" + to_string(num));
+            score_text.set_label("SCORE:" + to_string(score));
             result_text.set_label("U LOST");
-            num = 1;       
-        }
-
-        attach(play_again_button);
+            active_count = 1;
+        }        
         attach(result_box);
         attach(result_text);
         attach(quit);
         attach(score_box);
         attach(score_text);
 
-        put_on_top(play_again_button);
+        if (score == 0) put_on_top(play_again_button);
+        else put_on_top(continue_button);
         put_on_top(quit);
 
         flush();
@@ -215,3 +216,4 @@ int main()
     GameTable board{ Point{100, 100} };
     Graph_lib::gui_main();
 }
+
