@@ -22,6 +22,7 @@ struct Cell: Graph_lib::Button
     }
     void hide_color(){pw->color(FL_BACKGROUND_COLOR);}
 };
+
 void Cell::attach (Graph_lib::Window& win)
 {
     Button::attach(win);
@@ -71,6 +72,8 @@ private:
     int score = 0;
 
     Graph_lib::Vector_ref<Cell> cells;
+    //TODO: do back button
+
     Graph_lib::Rectangle countdown_box = {Point(150,200),300, 80};
     Graph_lib::Text countdown_text = {Point(100+100,200+50), ""};
     Graph_lib::Rectangle result_box = {Point(150,120),300, 80};
@@ -154,6 +157,7 @@ private:
     {
         hide();
     }
+    // TODO: do Cb for back button
 
     static void cb(Graph_lib::Address wid, Graph_lib::Address pw)
     {
@@ -216,4 +220,3 @@ int main()
     GameTable board{ Point{100, 100} };
     Graph_lib::gui_main();
 }
-
