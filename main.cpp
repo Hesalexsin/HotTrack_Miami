@@ -191,6 +191,7 @@ private:
         else
         {
             score = 0;
+            score_text.set_label("SCORE:" + to_string(num));
             result_text.set_label("U LOST");
             num = 1;       
         }
