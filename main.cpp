@@ -1,8 +1,5 @@
-
-
 #include <Graph_lib/Simple_window.h>
-#include "D:/mipt/program/proj/C++/std_lib_facilities.h"
-
+#include <std_lib_facilities.h>
 #include <ctime>
 
 using Graph_lib::Point;
@@ -38,6 +35,16 @@ public:
     {
         //TODO: Сделать outbox с обратным отсчетом до того, как выведутся клетки \ DONE
 
+        countdown_box.set_fill_color(FL_CYAN);
+        countdown_text.set_font(FL_TIMES_ITALIC);
+        countdown_text.set_font_size(40);
+        result_box.set_fill_color(FL_CYAN);
+        score_box.set_fill_color(FL_CYAN);
+        result_text.set_font(FL_TIMES_ITALIC);
+        result_text.set_font_size(40);
+        score_text.set_font(FL_TIMES_ITALIC);
+        score_text.set_font_size(40);
+
         for (int i = 0; i < N; ++i)
         {
             for (int j = 0; j < N; ++j)
@@ -60,11 +67,19 @@ private:
     int num = 1;
     // короче это итератор каким по счету чел нажал кнопку
     int i = 1;
+    // короче это счет чела
+    int score = 0;
 
     Graph_lib::Vector_ref<Cell> cells;
-
-    vector<Graph_lib::Widget*> ui_widgets;
-    vector<Graph_lib::Shape*> ui_shapes;
+    Graph_lib::Rectangle countdown_box = {Point(150,200),300, 80};
+    Graph_lib::Text countdown_text = {Point(100+100,200+50), ""};
+    Graph_lib::Rectangle result_box = {Point(150,120),300, 80};
+    Graph_lib::Text result_text = {Point(150+80,120+50), "NONE"};
+    Graph_lib::Button play_again_button =  {Point(150,280),300,80, "Play again!", cb_again};
+    Graph_lib::Button continue_button = {Point(150,280),300,80, "Continue!", cb_again};
+    Graph_lib::Button quit = {Point(150,360),300,80, "Quit!", cb_quit};
+    Graph_lib::Rectangle score_box = {Point(150,200),300, 80};
+    Graph_lib::Text score_text = {Point(150+80,200+50), "SCORE:" + to_string(score)};
 
     vector <int> order;
 
@@ -83,23 +98,16 @@ private:
 
     void countdown()
     {
-        Graph_lib::Rectangle* countdown_box = new Graph_lib::Rectangle{Point(150,200),300, 80};
-        countdown_box->set_fill_color(FL_CYAN);
-        Graph_lib::Text* countdown_text = new Graph_lib::Text {Point(100+100,200+50), ""};
-        countdown_text->set_font(FL_TIMES_ITALIC);
-        countdown_text->set_font_size(40);
-        attach(*countdown_box);
-        attach(*countdown_text);
+        attach(countdown_box);
+        attach(countdown_text);
         for (int i = 3; i > -1; i--)
         {
-            countdown_text->set_label("Start in " + to_string(i) + " sec");
+            countdown_text.set_label("Start in " + to_string(i) + " sec");
             flush();
             Sleep(dt);
         }
-        detach(*countdown_box);
-        detach(*countdown_text);
-        delete countdown_box;
-        delete countdown_text;
+        detach(countdown_box);
+        detach(countdown_text);
         flush();
         Sleep(dt);
     }
@@ -125,19 +133,12 @@ private:
 
     void start_again()
     {
-        for (int i = 0; i < ui_widgets.size(); i++)
-        {
-            detach(*ui_widgets[i]);
-            delete ui_widgets[i];
-        }
-        for (int i = 0; i < ui_shapes.size(); i++)
-        {
-            detach(*ui_shapes[i]);
-            delete ui_shapes[i];
-        }
-
-        ui_widgets.clear();
-        ui_shapes.clear();
+        detach(result_box);
+        detach(result_text);
+        detach(play_again_button);
+        detach(quit);
+        detach(score_box);
+        detach(score_text);
 
         for (int i = 0; i < cells.size(); i++)
             cells[i].is_activated = false;
@@ -171,14 +172,6 @@ private:
         Fl_Widget& w = Graph_lib::reference_to<Fl_Widget>(wid);
         Cell& c = at (Point{w.x(), w.y()});
 
-        Graph_lib::Rectangle* result_box = new  Graph_lib::Rectangle {Point(150,120),300, 80};
-        result_box->set_fill_color(FL_CYAN);
-        Graph_lib::Text* result_text = new  Graph_lib::Text {Point(150+80,120+50), "NONE"};
-
-        Graph_lib::Rectangle* score_box = new  Graph_lib::Rectangle {Point(150,200),300, 80};
-        score_box->set_fill_color(FL_CYAN);
-        Graph_lib::Text* score_text = new  Graph_lib::Text {Point(150+80,200+50), "SCORE:" + to_string(num)};
-
         string play_again_text = "Play again!";
         // TODO: Сделать вывод победы \ DONE
         if (c.seq_num == i)
@@ -186,8 +179,9 @@ private:
             i++;
             if (i > num)
             {
-                result_text->set_label("U RIGHT");
-                play_again_text = "Continue!";
+                score_text.set_label("SCORE:" + to_string(num));
+                result_text.set_label("U RIGHT");
+                score += 1;
                 num += 1;
             }
             else
@@ -196,32 +190,20 @@ private:
         //TODO: Сделать кнопку назад при проигрыше \ DONE
         else
         {
-            num = 1;
-            result_text->set_label("U LOST");
+            score = 0;
+            result_text.set_label("U LOST");
+            num = 1;       
         }
 
-        result_text->set_font(FL_TIMES_ITALIC);
-        result_text->set_font_size(40);
-        score_text->set_font(FL_TIMES_ITALIC);
-        score_text->set_font_size(40);
+        attach(play_again_button);
+        attach(result_box);
+        attach(result_text);
+        attach(quit);
+        attach(score_box);
+        attach(score_text);
 
-        Graph_lib::Button* play_again =  new  Graph_lib::Button {Point(150,280),300,80, play_again_text, cb_again};
-        Graph_lib::Button* quit = new Graph_lib::Button {Point(150,360),300,80, "Quit!", cb_quit};
-
-        ui_widgets.push_back(play_again);
-        ui_widgets.push_back(quit);
-        ui_shapes.push_back(result_box);
-        ui_shapes.push_back(result_text);
-        ui_shapes.push_back(score_box);
-        ui_shapes.push_back(score_text);
-
-        for (int i = 0; i < ui_widgets.size(); i++)
-            attach(*ui_widgets[i]);
-        for (int i = 0; i < ui_shapes.size(); i++)
-            attach(*ui_shapes[i]);
-
-        put_on_top(*play_again);
-        put_on_top(*quit);
+        put_on_top(play_again_button);
+        put_on_top(quit);
 
         flush();
     }
@@ -232,4 +214,3 @@ int main()
     GameTable board{ Point{100, 100} };
     Graph_lib::gui_main();
 }
-
